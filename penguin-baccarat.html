@@ -291,7 +291,13 @@
 
     <!-- Insurance Calculator -->
     <div class="ice-card" style="margin-top:4px">
-      <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.4);letter-spacing:0.2em;text-align:center;margin-bottom:14px;text-transform:uppercase">🛡️ Insurance Calculator</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="flex:1"></div>
+        <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.4);letter-spacing:0.2em;text-align:center;text-transform:uppercase">🛡️ Insurance Calculator</div>
+        <div style="flex:1;display:flex;justify-content:flex-end">
+          <button class="btn" onclick="clearInsurance()" style="padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(91,200,245,0.2);color:rgba(160,228,255,0.45);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;cursor:pointer" onmouseenter="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(160,228,255,0.8)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)';this.style.color='rgba(160,228,255,0.45)'">🗑️ Clear</button>
+        </div>
+      </div>
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:2">
           <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.5);margin-bottom:5px;letter-spacing:0.08em">Bet Amount</div>
@@ -312,7 +318,6 @@
           </div>
         </div>
       </div>
-      </div>
       <div id="ins-result" style="display:none;background:rgba(91,200,245,0.08);border:1.5px solid rgba(91,200,245,0.25);border-radius:12px;padding:14px 16px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span style="font-family:'Nunito',sans-serif;font-size:13px;color:rgba(160,228,255,0.6)">🛡️ Insurance amount to put in</span>
@@ -320,7 +325,6 @@
         </div>
       </div>
       <div id="ins-error" style="display:none;font-family:'Nunito',sans-serif;font-size:12px;color:rgba(255,120,120,0.7);text-align:center;margin-top:6px"></div>
-      <button class="btn" onclick="clearInsurance()" style="width:100%;margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(91,200,245,0.2);color:rgba(160,228,255,0.45);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em" onmouseenter="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(160,228,255,0.8)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)';this.style.color='rgba(160,228,255,0.45)'">🗑️ Clear</button>
     </div>
 
     <!-- Footer -->

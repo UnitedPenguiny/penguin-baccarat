@@ -1,4 +1,4 @@
-const CACHE_NAME = 'penguin-baccarat-v2';
+const CACHE_NAME = 'penguin-baccarat-v3';
 const ASSETS = [
   './',
   './penguin-baccarat.html',

@@ -1,0 +1,9 @@
+{
+  "name": "Penguin Baccarat",
+  "short_name": "🐧 Baccarat",
+  "start_url": "./penguin-baccarat.html",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "icons": []
+}

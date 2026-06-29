@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="🐧 Baccarat"/>
+  <meta name="theme-color" content="#0a1628"/>
+  <link rel="manifest" href="manifest.json"/>
+  <title>🐧 Penguin Baccarat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0a1628; -webkit-tap-highlight-color: transparent; }
+
+    @keyframes penguinWobble {
+      0%,100%{transform:rotate(-8deg) scale(1.02)} 50%{transform:rotate(8deg) scale(0.98)}
+    }
+    @keyframes penguinPop {
+      0%{transform:scale(0.4) rotate(-20deg);opacity:0}
+      60%{transform:scale(1.15) rotate(5deg)}
+      100%{transform:scale(1) rotate(0deg);opacity:1}
+    }
+    @keyframes revealCard {
+      0%{transform:scale(0.6) translateY(-16px);opacity:0}
+      60%{transform:scale(1.04)}
+      100%{transform:scale(1);opacity:1}
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fishFloat {
+      0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
+      100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0.3)}
+    }
+    @keyframes snow0 { 0%{transform:translateY(-20px) rotate(0deg);opacity:0.7} 100%{transform:translateY(110vh) rotate(360deg);opacity:0} }
+    @keyframes snow1 { 0%{transform:translateY(-20px) rotate(0deg);opacity:0.5} 100%{transform:translateY(110vh) rotate(-270deg);opacity:0} }
+    @keyframes snow2 { 0%{transform:translateY(-20px) rotate(0deg);opacity:0.6} 100%{transform:translateY(110vh) rotate(180deg);opacity:0} }
+    @keyframes snow3 { 0%{transform:translateY(-20px) rotate(0deg);opacity:0.4} 100%{transform:translateY(110vh) rotate(-360deg);opacity:0} }
+    @keyframes histIn {
+      from{opacity:0;transform:scale(0.4) rotate(-20deg)}
+      to{opacity:1;transform:scale(1) rotate(0)}
+    }
+    @keyframes streakWaddle { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
+    @keyframes iceGlow {
+      0%,100%{box-shadow:0 0 10px rgba(91,200,245,0.2),0 0 0 1px rgba(91,200,245,0.15)}
+      50%{box-shadow:0 0 25px rgba(91,200,245,0.4),0 0 0 1px rgba(91,200,245,0.35)}
+    }
+    @keyframes spinnerText {
+      0%,100%{opacity:0.5;transform:scale(0.95)} 50%{opacity:1;transform:scale(1.05)}
+    }
+
+    #app {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #0a1628 0%, #0d2040 30%, #0a2535 60%, #071520 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Georgia, serif;
+      padding: 24px 16px 52px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .snowflake {
+      position: fixed;
+      pointer-events: none;
+      user-select: none;
+      font-size: 12px;
+    }
+
+    .ice-shelf {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: linear-gradient(180deg,transparent,rgba(91,200,245,0.06));
+      pointer-events: none;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 430px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .ice-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg,transparent,rgba(91,200,245,0.4),rgba(180,230,255,0.6),rgba(91,200,245,0.4),transparent);
+    }
+
+    .ice-card {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(91,200,245,0.2);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.9) !important; }
+
+    #spin-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.15em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .mark-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .mark-btn {
+      flex: 1;
+      border-radius: 14px;
+      padding: 16px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .mark-btn .emoji { font-size: 26px; }
+
+    #history-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .hist-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka One', cursive;
+      font-size: 14px;
+      color: #fff;
+      position: relative;
+      flex-shrink: 0;
+      animation: histIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .hist-badge {
+      position: absolute;
+      bottom: -4px; right: -4px;
+      font-size: 12px;
+      line-height: 1;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+    }
+
+    #streak-bar {
+      width: 100%;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg,rgba(91,200,245,0.15),rgba(91,200,245,0.06));
+      border: 2px solid rgba(91,200,245,0.4);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 0 30px rgba(91,200,245,0.15);
+      animation: fadeUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .particle {
+      position: fixed;
+      left: 50%;
+      top: 38%;
+      pointer-events: none;
+      z-index: 99;
+      animation: fishFloat 0.9s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Snowflakes injected by JS -->
+  <div class="ice-shelf"></div>
+
+  <div class="content">
+
+    <!-- Title -->
+    <div style="text-align:center;margin-bottom:20px;width:100%">
+      <div style="font-size:28px;margin-bottom:4px;filter:drop-shadow(0 0 8px rgba(91,200,245,0.6))">🐧</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,48px);letter-spacing:0.1em;line-height:1;background:linear-gradient(180deg,#e8f8ff 0%,#a0e4ff 40%,#5bc8f5 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none">PENGUIN</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:clamp(18px,5vw,26px);color:rgba(160,228,255,0.7);letter-spacing:0.3em;margin-top:2px">BACCARAT</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.4);letter-spacing:0.25em;margin-top:6px">สุ่มผล  ·  บันทึกเอง  ·  ดูสถิติ</div>
+      <div style="margin-top:10px"><div class="ice-divider"></div></div>
+    </div>
+
+    <!-- Result Card -->
+    <div id="result-card" style="width:100%;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(91,200,245,0.04));border:2px solid rgba(91,200,245,0.15);padding:22px 20px;display:flex;align-items:center;justify-content:center;gap:18px;min-height:120px;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.5);transition:background 0.5s,border 0.4s,box-shadow 0.5s">
+      <!-- sheen -->
+      <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.09),transparent);border-radius:24px 24px 0 0;pointer-events:none"></div>
+      <!-- penguin svg -->
+      <div id="penguin-wrap" style="flex-shrink:0"></div>
+      <!-- text -->
+      <div style="flex:1">
+        <div id="result-text" style="font-family:'Fredoka One',cursive;font-size:clamp(18px,5vw,26px);color:rgba(160,228,255,0.25);letter-spacing:0.06em;transition:color 0.3s">—</div>
+        <div id="result-sub" style="display:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:rgba(255,255,255,0.7);margin-top:3px;letter-spacing:0.04em;animation:fadeUp 0.3s ease 0.1s both"></div>
+        <div id="spinning-sub" style="display:none;font-family:'Nunito',sans-serif;font-size:12px;color:rgba(91,200,245,0.5);margin-top:4px;letter-spacing:0.1em">🐧 กำลังว่ายน้ำ...</div>
+      </div>
+    </div>
+
+    <!-- Spin Button -->
+    <button id="spin-btn" class="btn" onclick="spin()" style="background:linear-gradient(135deg,rgba(91,200,245,0.2),rgba(91,200,245,0.08));border:2px solid rgba(91,200,245,0.55);color:#a0e4ff;box-shadow:0 4px 20px rgba(91,200,245,0.12),inset 0 1px 0 rgba(255,255,255,0.08)">
+      <span id="spin-icon" style="font-size:22px">🎰</span>
+      <span id="spin-label" style="font-family:'Nunito',sans-serif;font-weight:800">สุ่มผล</span>
+    </button>
+
+    <!-- Mark Buttons -->
+    <div class="ice-card">
+      <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.4);letter-spacing:0.2em;text-align:center;margin-bottom:12px;text-transform:uppercase">🐧 คุณทายถูกไหม? — บันทึกเอง</div>
+      <div class="mark-btns">
+        <button class="btn mark-btn" id="btn-win" onclick="mark('win')" style="background:rgba(255,255,255,0.03);border:2px solid rgba(91,200,245,0.1);color:rgba(91,200,245,0.2);cursor:default">
+          <span class="emoji">🐟</span><span>ถูก!</span>
+        </button>
+        <button class="btn mark-btn" id="btn-lose" onclick="mark('lose')" style="background:rgba(255,255,255,0.03);border:2px solid rgba(91,200,245,0.1);color:rgba(91,200,245,0.2);cursor:default">
+          <span class="emoji">🌊</span><span>ผิด</span>
+        </button>
+        <button class="btn mark-btn" id="btn-tie" onclick="mark('tie')" style="background:rgba(255,255,255,0.03);border:2px solid rgba(91,200,245,0.1);color:rgba(91,200,245,0.2);cursor:default">
+          <span class="emoji">❄️</span><span>TIE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="ice-card" style="padding:16px 20px">
+      <div style="display:flex;align-items:stretch;justify-content:space-around">
+        <div style="text-align:center;flex:1;padding:0 8px 0 0">
+          <div style="font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.4);letter-spacing:0.12em;margin-bottom:6px">ถูก 🐟</div>
+          <div id="stat-win" style="font-family:'Fredoka One',cursive;font-size:30px;color:#50ee88;text-shadow:0 0 18px #50ee8855">0</div>
+        </div>
+        <div style="text-align:center;flex:1;border-left:1px solid rgba(91,200,245,0.12);padding:0 0 0 8px">
+          <div style="font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.4);letter-spacing:0.12em;margin-bottom:6px">ผิด 🌊</div>
+          <div id="stat-lose" style="font-family:'Fredoka One',cursive;font-size:30px;color:#80c0ff;text-shadow:0 0 18px #80c0ff55">0</div>
+        </div>
+        <div style="text-align:center;flex:1;border-left:1px solid rgba(91,200,245,0.12);padding:0 0 0 8px">
+          <div style="font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.4);letter-spacing:0.12em;margin-bottom:6px">แม่น ❄️</div>
+          <div id="stat-pct" style="font-family:'Fredoka One',cursive;font-size:30px;color:#c0eaff;text-shadow:0 0 18px #c0eaff55">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streak -->
+    <div id="streak-bar" style="display:none">
+      <span style="font-size:26px;animation:streakWaddle 0.5s ease-in-out infinite">🐧</span>
+      <span style="font-family:'Fredoka One',cursive;font-size:20px;color:#a0e4ff;letter-spacing:0.06em">STREAK</span>
+      <span id="streak-num" style="font-family:'Fredoka One',cursive;font-size:32px;color:#e8f8ff;text-shadow:0 0 20px rgba(91,200,245,0.7)">0</span>
+      <span style="font-family:'Nunito',sans-serif;font-size:13px;color:rgba(91,200,245,0.6)">รอบ!</span>
+    </div>
+
+    <!-- History -->
+    <div id="history-card" class="ice-card" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <span style="font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.35);letter-spacing:0.25em">HISTORY</span>
+        <div style="flex:1;height:1px;background:rgba(91,200,245,0.1)"></div>
+        <div style="display:flex;align-items:center;gap:3px;font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.35)"><span style="font-size:11px">🐟</span>ถูก</div>
+        <div style="display:flex;align-items:center;gap:3px;font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.35)"><span style="font-size:11px">🌊</span>ผิด</div>
+        <div style="display:flex;align-items:center;gap:3px;font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.35)"><span style="font-size:11px">❄️</span>ข้าม</div>
+      </div>
+      <div id="history-dots"></div>
+    </div>
+
+    <!-- Insurance Calculator -->
+    <div class="ice-card" style="margin-top:4px">
+      <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.4);letter-spacing:0.2em;text-align:center;margin-bottom:14px;text-transform:uppercase">🛡️ Insurance Calculator</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:2">
+          <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.5);margin-bottom:5px;letter-spacing:0.08em">Bet Amount</div>
+          <input id="ins-amount" type="number" inputmode="numeric" placeholder="1000"
+            style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(91,200,245,0.3);border-radius:10px;padding:10px 12px;color:#e8f8ff;font-family:'Fredoka One',cursive;font-size:18px;outline:none;-webkit-appearance:none"
+            oninput="calcInsurance()"/>
+        </div>
+        <div style="flex:1">
+          <div style="font-family:'Nunito',sans-serif;font-size:11px;color:rgba(160,228,255,0.5);margin-bottom:5px;letter-spacing:0.08em;text-align:center">Odds</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input id="ins-odds-num" type="number" inputmode="numeric" placeholder="5"
+              style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(91,200,245,0.3);border-radius:10px;padding:10px 8px;color:#e8f8ff;font-family:'Fredoka One',cursive;font-size:18px;outline:none;-webkit-appearance:none;text-align:center"
+              oninput="calcInsurance()"/>
+            <span style="color:rgba(160,228,255,0.5);font-family:'Fredoka One',cursive;font-size:18px;flex-shrink:0">:</span>
+            <input id="ins-odds-den" type="number" inputmode="numeric" placeholder="2"
+              style="width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(91,200,245,0.3);border-radius:10px;padding:10px 8px;color:#e8f8ff;font-family:'Fredoka One',cursive;font-size:18px;outline:none;-webkit-appearance:none;text-align:center"
+              oninput="calcInsurance()"/>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div id="ins-result" style="display:none;background:rgba(91,200,245,0.08);border:1.5px solid rgba(91,200,245,0.25);border-radius:12px;padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'Nunito',sans-serif;font-size:13px;color:rgba(160,228,255,0.6)">🛡️ Insurance amount to put in</span>
+          <span id="ins-profit" style="font-family:'Fredoka One',cursive;font-size:26px;color:#50ee88"></span>
+        </div>
+      </div>
+      <div id="ins-error" style="display:none;font-family:'Nunito',sans-serif;font-size:12px;color:rgba(255,120,120,0.7);text-align:center;margin-top:6px"></div>
+      <button class="btn" onclick="clearInsurance()" style="width:100%;margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(91,200,245,0.2);color:rgba(160,228,255,0.45);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em" onmouseenter="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(160,228,255,0.8)'" onmouseleave="this.style.background='rgba(255,255,255,0.04)';this.style.color='rgba(160,228,255,0.45)'">🗑️ Clear</button>
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top:24px;text-align:center;width:100%">
+      <div class="ice-divider" style="margin-bottom:10px"></div>
+      <div style="font-family:'Nunito',sans-serif;font-size:10px;color:rgba(160,228,255,0.2);letter-spacing:0.18em">🐧 FOR ENTERTAINMENT ONLY · STAY COOL 🐧</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SPIN_LABELS = ["BANKER","PLAYER","BANKER","PLAYER","B","P","🐧","❄️"];
+const COLORS = {
+  PLAYER: { bg:"linear-gradient(135deg,#1a4a6a,#2a7fb5,#1a4a6a)", ball:"#5bc8f5", accent:"#a0e4ff" },
+  BANKER: { bg:"linear-gradient(135deg,#0d1a2e,#1a2a4a,#0d1a2e)", ball:"#c8d8f0", accent:"#e0ecff" },
+};
+const LABEL_TH = { PLAYER:"ผู้เล่น 🐟", BANKER:"เจ้ามือ 🎩" };
+
+let phase = "idle";
+let result = null;
+let history = [];
+let streak = 0;
+let frameTimer = null;
+
+// ── Snowflakes ──
+const flakes = [
+  {x:"8%",y:"5%",size:12,op:0.35,s:0},
+  {x:"20%",y:"15%",size:10,op:0.25,s:1},
+  {x:"55%",y:"2%",size:14,op:0.3,s:2},
+  {x:"75%",y:"8%",size:10,op:0.2,s:3},
+  {x:"90%",y:"18%",size:12,op:0.3,s:1},
+  {x:"35%",y:"12%",size:8,op:0.2,s:2},
+];
+flakes.forEach(f => {
+  const el = document.createElement('div');
+  el.className = 'snowflake';
+  el.textContent = '❄️';
+  el.style.cssText = `left:${f.x};top:${f.y};font-size:${f.size}px;opacity:${f.op};animation:snow${f.s} ${3+f.s}s linear infinite`;
+  document.getElementById('app').appendChild(el);
+});
+
+// ── Penguin SVG builder ──
+function buildPenguin(variant, size=70) {
+  const eyeColor = variant === "spin" ? "#555" : "#1a1a2e";
+  const cheekColor = variant === "player" ? "#ff9eb5" : variant === "banker" ? "#ffd0a0" : "#ffb8c8";
+  const topColor = variant === "player" ? "#2a7fb5" : variant === "banker" ? "#1a2a4a" : "#222";
+  const bellyColor = variant === "idle" ? "#e8e8e0" : "#f0f0e8";
+  const bewildered = variant === "spin";
+
+  let filterVal = "none";
+  if (variant === "player") filterVal = "drop-shadow(0 4px 12px #5bc8f599)";
+  else if (variant === "banker") filterVal = "drop-shadow(0 4px 12px #c8d8f099)";
+
+  let anim = "";
+  if (variant === "spin") anim = "penguinWobble 0.3s ease-in-out infinite";
+  else if (variant === "player" || variant === "banker") anim = "penguinPop 0.5s cubic-bezier(0.34,1.56,0.64,1)";
+
+  const eyeSVG = bewildered
+    ? `<circle cx="24" cy="22" r="5" fill="white"/>
+       <circle cx="36" cy="22" r="5" fill="white"/>
+       <path d="M24 19 Q27 22 24 25 Q21 22 24 19" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+       <path d="M36 19 Q39 22 36 25 Q33 22 36 19" fill="#aaa" stroke="#888" stroke-width="0.5"/>`
+    : `<circle cx="24" cy="22" r="5" fill="white"/>
+       <circle cx="36" cy="22" r="5" fill="white"/>
+       <circle cx="25" cy="22" r="3" fill="${eyeColor}"/>
+       <circle cx="37" cy="22" r="3" fill="${eyeColor}"/>
+       <circle cx="26" cy="21" r="1" fill="white"/>
+       <circle cx="38" cy="21" r="1" fill="white"/>`;
+
+  const extras = variant === "banker"
+    ? `<g transform="translate(30,42)">
+         <polygon points="-6,-3 0,0 -6,3" fill="#2a2a4a"/>
+         <polygon points="6,-3 0,0 6,3" fill="#2a2a4a"/>
+         <circle cx="0" cy="0" r="2" fill="#3a3a6a"/>
+       </g>`
+    : variant === "player"
+    ? `<text x="30" y="48" text-anchor="middle" font-size="10" fill="#5bc8f5">🐟</text>`
+    : `<text x="30" y="10" text-anchor="middle" font-size="13">❄️</text>`;
+
+  return `<svg width="${size}" height="${size}" viewBox="0 0 60 60"
+    style="filter:${filterVal};animation:${anim};flex-shrink:0;display:block">
+    <ellipse cx="30" cy="32" rx="22" ry="24" fill="${topColor}"/>
+    <ellipse cx="30" cy="36" rx="14" ry="17" fill="${bellyColor}"/>
+    <ellipse cx="9" cy="36" rx="7" ry="11" fill="${topColor}" transform="rotate(-15 9 36)"/>
+    <ellipse cx="51" cy="36" rx="7" ry="11" fill="${topColor}" transform="rotate(15 51 36)"/>
+    <ellipse cx="22" cy="56" rx="8" ry="4" fill="#f5a623"/>
+    <ellipse cx="38" cy="56" rx="8" ry="4" fill="#f5a623"/>
+    <ellipse cx="30" cy="26" rx="13" ry="14" fill="${bellyColor}"/>
+    ${eyeSVG}
+    <polygon points="30,27 26,31 34,31" fill="#f5a623"/>
+    <ellipse cx="18" cy="27" rx="4" ry="3" fill="${cheekColor}" opacity="0.6"/>
+    <ellipse cx="42" cy="27" rx="4" ry="3" fill="${cheekColor}" opacity="0.6"/>
+    ${extras}
+  </svg>`;
+}
+
+function renderPenguin(variant) {
+  document.getElementById('penguin-wrap').innerHTML = buildPenguin(variant, 70);
+}
+renderPenguin('idle');
+
+// ── Particles ──
+function spawnParticles(isPlayer) {
+  const emojis = isPlayer ? ["🐟","🐠","🐡","🐟","🐟"] : ["🎩","⭐","✨","💎","🎩"];
+  const container = document.getElementById('app');
+  const frags = [];
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('div');
+    el.className = 'particle';
+    const dx = (Math.random()-0.5)*180;
+    const dy = -50 - Math.random()*120;
+    const rot = (Math.random()-0.5)*360;
+    const sz = 14 + Math.random()*14;
+    el.style.cssText = `font-size:${sz}px;--dx:${dx}px;--dy:${dy}px;--rot:${rot}deg`;
+    el.textContent = emojis[i % emojis.length];
+    container.appendChild(el);
+    frags.push(el);
+  }
+  setTimeout(() => frags.forEach(e => e.remove()), 1000);
+}
+
+// ── Mark buttons state ──
+const markDefs = {
+  win:  { bg:"rgba(34,180,100,0.18)", border:"rgba(50,220,110,0.65)", color:"#50ee88", glow:"rgba(50,220,110,0.2)" },
+  lose: { bg:"rgba(50,100,180,0.22)", border:"rgba(80,150,220,0.65)", color:"#80c0ff", glow:"rgba(80,150,220,0.2)" },
+  tie:  { bg:"rgba(160,220,240,0.14)", border:"rgba(180,230,255,0.55)", color:"#c0eaff", glow:"rgba(180,230,255,0.15)" },
+};
+
+function setMarkButtons(active) {
+  ['win','lose','tie'].forEach(m => {
+    const btn = document.getElementById('btn-'+m);
+    if (active) {
+      const d = markDefs[m];
+      btn.style.background = d.bg;
+      btn.style.border = `2px solid ${d.border}`;
+      btn.style.color = d.color;
+      btn.style.cursor = 'pointer';
+      btn.style.boxShadow = `0 0 22px ${d.glow}`;
+      btn.onmouseenter = () => { btn.style.transform = 'translateY(-3px) scale(1.04)'; };
+      btn.onmouseleave = () => { btn.style.transform = ''; };
+    } else {
+      btn.style.background = 'rgba(255,255,255,0.03)';
+      btn.style.border = '2px solid rgba(91,200,245,0.1)';
+      btn.style.color = 'rgba(91,200,245,0.2)';
+      btn.style.cursor = 'default';
+      btn.style.boxShadow = 'none';
+      btn.onmouseenter = null;
+      btn.onmouseleave = null;
+    }
+  });
+}
+
+// ── Spin ──
+function spin() {
+  if (phase === 'spinning') return;
+  result = Math.random() < 0.5 ? 'PLAYER' : 'BANKER';
+  phase = 'spinning';
+
+  // Update spin button
+  const btn = document.getElementById('spin-btn');
+  btn.style.background = 'rgba(10,25,50,0.8)';
+  btn.style.border = '2px solid rgba(91,200,245,0.15)';
+  btn.style.color = 'rgba(91,200,245,0.35)';
+  btn.style.boxShadow = 'none';
+  btn.style.cursor = 'not-allowed';
+  document.getElementById('spin-icon').textContent = '🐧';
+  document.getElementById('spin-label').textContent = 'กำลังสุ่ม...';
+
+  // Update result card
+  const card = document.getElementById('result-card');
+  card.style.background = 'linear-gradient(135deg,rgba(255,255,255,0.06),rgba(91,200,245,0.04))';
+  card.style.border = '2px solid rgba(91,200,245,0.5)';
+  card.style.animation = 'iceGlow 0.6s ease-in-out infinite';
+
+  const rt = document.getElementById('result-text');
+  rt.style.fontSize = 'clamp(18px,5vw,26px)';
+  rt.style.color = 'rgba(160,228,255,0.8)';
+  rt.style.animation = 'spinnerText 0.25s ease-in-out infinite';
+  document.getElementById('result-sub').style.display = 'none';
+  document.getElementById('spinning-sub').style.display = 'block';
+
+  renderPenguin('spin');
+  setMarkButtons(false);
+
+  let elapsed = 0;
+  const duration = 2000;
+  let interval = 55;
+
+  function tick() {
+    elapsed += interval;
+    const progress = elapsed / duration;
+    interval = 55 + progress * 260;
+    rt.textContent = SPIN_LABELS[Math.floor(Math.random() * SPIN_LABELS.length)];
+    if (elapsed >= duration) {
+      reveal();
+    } else {
+      frameTimer = setTimeout(tick, interval);
+    }
+  }
+  clearTimeout(frameTimer);
+  tick();
+}
+
+function reveal() {
+  phase = 'revealed';
+  const c = COLORS[result];
+
+  // Card
+  const card = document.getElementById('result-card');
+  card.style.background = c.bg;
+  card.style.border = `2px solid ${c.accent}55`;
+  card.style.boxShadow = `0 8px 50px ${c.ball}44, inset 0 1px 0 rgba(255,255,255,0.15)`;
+  card.style.animation = 'revealCard 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+
+  // Text
+  const rt = document.getElementById('result-text');
+  rt.textContent = result;
+  rt.style.fontSize = 'clamp(26px,8vw,38px)';
+  rt.style.color = '#fff';
+  rt.style.animation = 'none';
+  rt.style.textShadow = '0 2px 12px rgba(0,0,0,0.5)';
+
+  const sub = document.getElementById('result-sub');
+  sub.textContent = LABEL_TH[result];
+  sub.style.display = 'block';
+  document.getElementById('spinning-sub').style.display = 'none';
+
+  renderPenguin(result === 'PLAYER' ? 'player' : 'banker');
+  spawnParticles(result === 'PLAYER');
+  setMarkButtons(true);
+
+  // Spin button
+  const btn = document.getElementById('spin-btn');
+  btn.style.cursor = 'not-allowed';
+}
+
+function mark(m) {
+  if (phase !== 'revealed') return;
+  streak = m === 'win' ? streak + 1 : 0;
+  history.unshift({ result, mark: m });
+
+  // Reset UI
+  phase = 'idle';
+  result = null;
+
+  const card = document.getElementById('result-card');
+  card.style.background = 'linear-gradient(135deg,rgba(255,255,255,0.06),rgba(91,200,245,0.04))';
+  card.style.border = '2px solid rgba(91,200,245,0.15)';
+  card.style.boxShadow = '0 4px 24px rgba(0,0,0,0.5)';
+  card.style.animation = 'none';
+
+  const rt = document.getElementById('result-text');
+  rt.textContent = '—';
+  rt.style.fontSize = 'clamp(18px,5vw,26px)';
+  rt.style.color = 'rgba(160,228,255,0.25)';
+  rt.style.animation = 'none';
+  rt.style.textShadow = 'none';
+  document.getElementById('result-sub').style.display = 'none';
+  document.getElementById('spinning-sub').style.display = 'none';
+
+  renderPenguin('idle');
+  setMarkButtons(false);
+
+  // Spin button
+  const btn = document.getElementById('spin-btn');
+  btn.style.background = 'linear-gradient(135deg,rgba(91,200,245,0.2),rgba(91,200,245,0.08))';
+  btn.style.border = '2px solid rgba(91,200,245,0.55)';
+  btn.style.color = '#a0e4ff';
+  btn.style.boxShadow = '0 4px 20px rgba(91,200,245,0.12),inset 0 1px 0 rgba(255,255,255,0.08)';
+  btn.style.cursor = 'pointer';
+  document.getElementById('spin-icon').textContent = '🎰';
+  document.getElementById('spin-label').textContent = 'สุ่มผล';
+
+  updateStats();
+  updateStreak();
+  updateHistory();
+}
+
+function updateStats() {
+  const wins = history.filter(h => h.mark === 'win').length;
+  const loses = history.filter(h => h.mark === 'lose').length;
+  const total = history.filter(h => h.mark !== 'tie').length;
+  const pct = total > 0 ? Math.round(wins / total * 100) : null;
+  document.getElementById('stat-win').textContent = wins;
+  document.getElementById('stat-lose').textContent = loses;
+  document.getElementById('stat-pct').textContent = pct !== null ? pct + '%' : '—';
+}
+
+function updateStreak() {
+  const bar = document.getElementById('streak-bar');
+  if (streak >= 2) {
+    document.getElementById('streak-num').textContent = streak;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function clearInsurance() {
+  document.getElementById("ins-amount").value = "";
+  document.getElementById("ins-odds-num").value = "";
+  document.getElementById("ins-odds-den").value = "";
+  document.getElementById("ins-result").style.display = "none";
+  document.getElementById("ins-error").style.display = "none";
+}
+
+function calcInsurance() {
+  const amountRaw = document.getElementById("ins-amount").value.trim();
+  const numRaw = document.getElementById("ins-odds-num").value.trim();
+  const denRaw = document.getElementById("ins-odds-den").value.trim();
+  const resEl = document.getElementById("ins-result");
+  const errEl = document.getElementById("ins-error");
+  resEl.style.display = "none";
+  errEl.style.display = "none";
+  if (!amountRaw || !numRaw || !denRaw) return;
+  const amount = parseFloat(amountRaw);
+  const num = parseFloat(numRaw);
+  const den = parseFloat(denRaw);
+  if (isNaN(amount) || amount <= 0) { errEl.textContent = "Enter a valid bet amount"; errEl.style.display = "block"; return; }
+  if (isNaN(num) || num <= 0) { errEl.textContent = "Enter a valid top odds number"; errEl.style.display = "block"; return; }
+  if (isNaN(den) || den <= 0) { errEl.textContent = "Enter a valid bottom odds number"; errEl.style.display = "block"; return; }
+  const insurance = amount * den / num;
+  document.getElementById("ins-profit").textContent = insurance.toLocaleString(undefined, {maximumFractionDigits:2});
+  resEl.style.display = "block";
+}
+
+function updateHistory() {
+  const card = document.getElementById('history-card');
+  const dots = document.getElementById('history-dots');
+  if (history.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  dots.innerHTML = '';
+  // Newest on the right: render in reverse (oldest first)
+  [...history].reverse().forEach(h => {
+    const isPlayer = h.result === 'PLAYER';
+    const bg = isPlayer
+      ? 'radial-gradient(circle at 35% 30%,rgba(100,190,240,0.6),rgba(20,80,140,0.85))'
+      : 'radial-gradient(circle at 35% 30%,rgba(140,160,200,0.5),rgba(10,20,50,0.9))';
+
+    const borderColor = h.mark === 'win'
+      ? 'rgba(50,220,110,0.6)'
+      : h.mark === 'lose'
+      ? 'rgba(220,60,60,0.7)'
+      : 'rgba(240,200,40,0.7)';
+
+    const glowColor = h.mark === 'win'
+      ? 'rgba(50,220,110,0.4)'
+      : h.mark === 'lose'
+      ? 'rgba(220,60,60,0.4)'
+      : 'rgba(240,200,40,0.4)';
+
+    const dot = document.createElement('div');
+    dot.className = 'hist-dot';
+    dot.style.background = bg;
+    dot.style.border = `2px solid ${borderColor}`;
+    dot.style.boxShadow = `0 0 10px ${glowColor}`;
+    dot.textContent = isPlayer ? 'P' : 'B';
+
+    const badge = h.mark === 'win' ? '🐟' : h.mark === 'lose' ? '🌊' : null;
+    if (badge) {
+      const b = document.createElement('div');
+      b.className = 'hist-badge';
+      b.textContent = badge;
+      dot.appendChild(b);
+    }
+    dots.appendChild(dot);
+  });
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+</html>
